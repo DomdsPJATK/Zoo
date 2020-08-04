@@ -54,11 +54,11 @@ public class ElephantParade {
         List<Boolean> visited = createBooleanListWithDefualtValue(this.elephantQuantity);
         List<List<Integer>> cycles = new ArrayList<>();
 
-        int numberOfvisited = 0;
+        int numberOfVisited = 0;
         for (int i = 0; i < visited.size(); i++) {
             if(!visited.get(i)) {
                 visited.set(i, true);
-                numberOfvisited++;
+                numberOfVisited++;
                 List<Integer> cycle = new ArrayList<>();
                 cycle.add(currentPositions.get(i));
                 int toFind = predictedPositions.get(i);
@@ -68,12 +68,12 @@ public class ElephantParade {
                     if(!visited.get(currentIndex)){
                         if(currentPositions.get(currentIndex) == toFind){
                             visited.set(currentIndex, true);
-                            numberOfvisited++;
+                            numberOfVisited++;
                             cycle.add(toFind);
                             toFind = predictedPositions.get(currentIndex);
                         }
                     }
-                    if(numberOfvisited == visited.size()) break;
+                    if(numberOfVisited == visited.size()) break;
                     currentIndex = (currentIndex < visited.size() - 1) ? currentIndex+1 : 0;
                 }
                 cycles.add(cycle);
