@@ -55,15 +55,15 @@ public class ElephantParade {
         List<List<Integer>> cycles = new ArrayList<>();
 
         int numberOfVisited = 0;
-        for (int i = 0; i < visited.size(); i++) {
-            if(!visited.get(i)) {
-                visited.set(i, true);
+        for (int index = 0; index < visited.size(); index++) {
+            if(!visited.get(index)) {
+                visited.set(index, true);
                 numberOfVisited++;
                 List<Integer> cycle = new ArrayList<>();
-                cycle.add(currentPositions.get(i));
-                int toFind = predictedPositions.get(i);
+                cycle.add(currentPositions.get(index));
+                int toFind = predictedPositions.get(index);
 
-                int currentIndex = 0;
+                int currentIndex = index;
                 while(cycle.get(0) != toFind){
                     if(!visited.get(currentIndex)){
                         if(currentPositions.get(currentIndex) == toFind){
@@ -74,7 +74,7 @@ public class ElephantParade {
                         }
                     }
                     if(numberOfVisited == visited.size()) break;
-                    currentIndex = (currentIndex < visited.size() - 1) ? currentIndex+1 : 0;
+                    currentIndex = (currentIndex < visited.size() - 1) ? currentIndex+1 : index;
                 }
                 cycles.add(cycle);
             }
