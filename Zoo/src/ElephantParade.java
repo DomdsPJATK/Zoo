@@ -108,7 +108,7 @@ public class ElephantParade {
 
 
     public static void main(String[] args) {
-        ElephantParade elephantParade = new ElephantParade("slo1.in", "result.out");
+        ElephantParade elephantParade = new ElephantParade("Zoo/slo1.in", "result.out");
     }
 
 }
