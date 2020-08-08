@@ -9,20 +9,20 @@ public class ElephantParade {
     private String pathOut;
     private Map<Integer, Elephant> elephants;
     private int elephantQuantity;
-    private List<List<Elephant>> cycles;
-    private int result = 0;
+    private long result;
+    private short globalMin;
 
     public ElephantParade(String pathIn, String pathOut) {
         this.pathIn = pathIn;
         this.pathOut = pathOut;
-        this.elephants = new HashMap<>();
+        this.elephants = new LinkedHashMap<>();
         try {
             readFromFile(pathIn);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        this.cycles = findCycles();
-        System.out.println(cycles);
+        result = countResultCostOfReorder();
+        System.out.println(result);
     }
 
 
@@ -42,42 +42,53 @@ public class ElephantParade {
     }
 
 
-    private List<List<Elephant>> findCycles() {
-        List<List<Elephant>> cycles = new ArrayList<>();
-        int singleCycleQuantity = 0;
+    private long countResultCostOfReorder() {
+        long result = 0;
 
         for (Map.Entry<Integer, Elephant> entry : elephants.entrySet()) {
             Elephant currentElephant = entry.getValue();
             if(!currentElephant.isVisited()) {
                 currentElephant.setVisited(true);
-                List<Elephant> cycle = new ArrayList<>();
-                cycle.add(currentElephant);
+                int firstVertexId = currentElephant.getId();
+                short cycleMin = currentElephant.getWeight();
+                long cycleSum = currentElephant.getWeight();
+                int cycleQuantity = 1;
 
-                while(cycle.get(0).getId() != currentElephant.getPairId()){
+                while(firstVertexId != currentElephant.getPairId()){
                     Elephant nextElephant = elephants.get(currentElephant.getPairId());
                     nextElephant.setVisited(true);
-                    cycle.add(nextElephant);
+                    cycleMin = (cycleMin > nextElephant.getWeight()) ? nextElephant.getWeight() : cycleMin;
+                    cycleSum += nextElephant.getWeight();
+                    cycleQuantity++;
                     currentElephant = nextElephant;
                 }
 
-                if(cycle.size() == 1) singleCycleQuantity++;
-                cycles.add(cycle);
+                System.out.println(cycleSum + " " + cycleMin + " " + cycleQuantity + " " + globalMin);
+                long firstMethod = cycleSum + (cycleQuantity - 2) * cycleMin;
+                long secondMethod = cycleSum + cycleMin + (cycleQuantity + 1) * globalMin;
+                result += (firstMethod > secondMethod) ? secondMethod : firstMethod;
             }
         }
-        System.out.println(singleCycleQuantity);
-        return cycles;
+
+        return result;
     }
 
 
     public Map<Integer, Elephant> createMapOfElephants(String weightsLine, String currentPositionsLine, String predictedPositionsLine, int quantity) {
-        HashMap<Integer, Elephant> elephants = new HashMap<>();
+        LinkedHashMap<Integer, Elephant> elephants = new LinkedHashMap<>();
         String[] weightsTab = weightsLine.split(" ");;
         String[] positionsTab = currentPositionsLine.split(" ");
         String[] predictedPositionsTab = predictedPositionsLine.split(" ");
 
+        globalMin = Short.parseShort(weightsTab[0]);
+
         for (int i = 0; i < quantity; i++) {
-            elephants.put(Integer.parseInt(positionsTab[i]),new Elephant(Short.parseShort(weightsTab[i]),Integer.parseInt(positionsTab[i]),Integer.parseInt(predictedPositionsTab[i])));
+            short currentWeight = Short.parseShort(weightsTab[i]);
+            globalMin = (globalMin > currentWeight) ? currentWeight : globalMin;
+            elephants.put(Integer.parseInt(positionsTab[i]),new Elephant(currentWeight,Integer.parseInt(positionsTab[i]),Integer.parseInt(predictedPositionsTab[i])));
         }
+
+        System.out.println(globalMin);
 
         return elephants;
     }
