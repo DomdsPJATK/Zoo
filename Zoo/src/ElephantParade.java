@@ -1,20 +1,20 @@
 import Models.Elephant;
 
 import java.io.*;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 
 public class ElephantParade {
 
     private String pathIn;
-    private String pathOut;
     private Map<Integer, Elephant> elephants;
     private int elephantQuantity;
     private long result;
     private short globalMin;
 
-    public ElephantParade(String pathIn, String pathOut) {
+    public ElephantParade(String pathIn) {
         this.pathIn = pathIn;
-        this.pathOut = pathOut;
         this.elephants = new LinkedHashMap<>();
         try {
             readFromFile(pathIn);
@@ -63,7 +63,6 @@ public class ElephantParade {
                     currentElephant = nextElephant;
                 }
 
-                System.out.println(cycleSum + " " + cycleMin + " " + cycleQuantity + " " + globalMin);
                 long firstMethod = cycleSum + (cycleQuantity - 2) * cycleMin;
                 long secondMethod = cycleSum + cycleMin + (cycleQuantity + 1) * globalMin;
                 result += (firstMethod > secondMethod) ? secondMethod : firstMethod;
@@ -83,12 +82,14 @@ public class ElephantParade {
         globalMin = Short.parseShort(weightsTab[0]);
 
         for (int i = 0; i < quantity; i++) {
-            short currentWeight = Short.parseShort(weightsTab[i]);
-            globalMin = (globalMin > currentWeight) ? currentWeight : globalMin;
-            elephants.put(Integer.parseInt(positionsTab[i]),new Elephant(currentWeight,Integer.parseInt(positionsTab[i]),Integer.parseInt(predictedPositionsTab[i])));
+            elephants.put(Integer.parseInt(positionsTab[i]),new Elephant(Integer.parseInt(positionsTab[i]),Integer.parseInt(predictedPositionsTab[i])));
         }
 
-        System.out.println(globalMin);
+        for (Map.Entry<Integer, Elephant> entry : elephants.entrySet()) {
+            short currentWeight = Short.parseShort(weightsTab[entry.getValue().getId()-1]);
+            globalMin = (globalMin > currentWeight) ? currentWeight : globalMin;
+            entry.getValue().setWeight(Short.parseShort(String.valueOf(currentWeight)));
+        }
 
         return elephants;
     }
@@ -96,7 +97,19 @@ public class ElephantParade {
     //-------------------------------------------------------------------
 
     public static void main(String[] args) {
-        ElephantParade elephantParade = new ElephantParade("Zoo/slo1.in", "result.out");
+        String path = "Zoo/In";
+        Path directoryPath = Paths.get("Zoo/In");
+        try {
+            Files.walkFileTree(directoryPath,  new SimpleFileVisitor<Path>(){
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                    new ElephantParade(path + "/" + file.getFileName().toString());
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

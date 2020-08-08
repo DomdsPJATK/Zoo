@@ -7,7 +7,7 @@ public class Elephant {
     private int pairId;
     private boolean isVisited;
 
-    public Elephant(short weight, int id, int pairId) {
+    public Elephant(int id, int pairId) {
         this.weight = weight;
         this.id = id;
         this.pairId = pairId;
@@ -28,6 +28,10 @@ public class Elephant {
 
     public int getPairId() {
         return pairId;
+    }
+
+    public void setWeight(short weight) {
+        this.weight = weight;
     }
 
     public boolean isVisited() {
