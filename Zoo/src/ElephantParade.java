@@ -1,33 +1,30 @@
+import Models.Elephant;
+
 import java.io.*;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ElephantParade {
 
     private String pathIn;
     private String pathOut;
-    private Map<Integer, Integer> elephants;
-    private List<Integer> currentPositions;
-    private List<Integer> predictedPositions;
+    private Map<Integer, Elephant> elephants;
     private int elephantQuantity;
-    private List<List<Integer>> cycles;
+    private List<List<Elephant>> cycles;
+    private int result = 0;
 
     public ElephantParade(String pathIn, String pathOut) {
         this.pathIn = pathIn;
         this.pathOut = pathOut;
         this.elephants = new HashMap<>();
-        this.currentPositions = new ArrayList<>();
-        this.predictedPositions = new ArrayList<>();
         try {
             readFromFile(pathIn);
         } catch (IOException e) {
             e.printStackTrace();
         }
         this.cycles = findCycles();
-        System.out.println();
         System.out.println(cycles);
     }
+
 
     private void readFromFile(String path) throws IOException{
         File file = new File(path);
@@ -40,72 +37,52 @@ public class ElephantParade {
         String predictedPositionsLine = br.readLine();
 
         this.elephantQuantity = Integer.parseInt(elephantQuantityLine);
-        this.elephants = createMapOfElephants(weightsLine, initialPositionsLine, this.elephantQuantity);
-        this.currentPositions = createIntegersListFromLine(initialPositionsLine);
-        this.predictedPositions = createIntegersListFromLine(predictedPositionsLine);
+        this.elephants = createMapOfElephants(weightsLine, initialPositionsLine, predictedPositionsLine, this.elephantQuantity);
 
-        System.out.println(elephantQuantity);
-        System.out.println(elephants);
-        System.out.println(currentPositions);
-        System.out.println(predictedPositions);
     }
 
-    private List<List<Integer>> findCycles() {
-        List<Boolean> visited = createBooleanListWithDefualtValue(this.elephantQuantity);
-        List<List<Integer>> cycles = new ArrayList<>();
 
-        int numberOfVisited = 0;
-        for (int index = 0; index < visited.size(); index++) {
-            if(!visited.get(index)) {
-                visited.set(index, true);
-                numberOfVisited++;
-                List<Integer> cycle = new ArrayList<>();
-                cycle.add(currentPositions.get(index));
-                int toFind = predictedPositions.get(index);
+    private List<List<Elephant>> findCycles() {
+        List<List<Elephant>> cycles = new ArrayList<>();
+        int singleCycleQuantity = 0;
 
-                int currentIndex = index;
-                while(cycle.get(0) != toFind){
-                    if(!visited.get(currentIndex)){
-                        if(currentPositions.get(currentIndex) == toFind){
-                            visited.set(currentIndex, true);
-                            numberOfVisited++;
-                            cycle.add(toFind);
-                            toFind = predictedPositions.get(currentIndex);
-                        }
-                    }
-                    if(numberOfVisited == visited.size()) break;
-                    currentIndex = (currentIndex < visited.size() - 1) ? currentIndex+1 : index;
+        for (Map.Entry<Integer, Elephant> entry : elephants.entrySet()) {
+            Elephant currentElephant = entry.getValue();
+            if(!currentElephant.isVisited()) {
+                currentElephant.setVisited(true);
+                List<Elephant> cycle = new ArrayList<>();
+                cycle.add(currentElephant);
+
+                while(cycle.get(0).getId() != currentElephant.getPairId()){
+                    Elephant nextElephant = elephants.get(currentElephant.getPairId());
+                    nextElephant.setVisited(true);
+                    cycle.add(nextElephant);
+                    currentElephant = nextElephant;
                 }
+
+                if(cycle.size() == 1) singleCycleQuantity++;
                 cycles.add(cycle);
             }
         }
+        System.out.println(singleCycleQuantity);
         return cycles;
     }
 
 
-    public Map<Integer, Integer> createMapOfElephants(String weightsLine, String currentPositionsLine, int quantity) {
-        HashMap<Integer, Integer> elephants = new HashMap<>();
+    public Map<Integer, Elephant> createMapOfElephants(String weightsLine, String currentPositionsLine, String predictedPositionsLine, int quantity) {
+        HashMap<Integer, Elephant> elephants = new HashMap<>();
         String[] weightsTab = weightsLine.split(" ");;
         String[] positionsTab = currentPositionsLine.split(" ");
+        String[] predictedPositionsTab = predictedPositionsLine.split(" ");
 
         for (int i = 0; i < quantity; i++) {
-            elephants.put(Integer.parseInt(positionsTab[i]),Integer.parseInt(weightsTab[i]));
+            elephants.put(Integer.parseInt(positionsTab[i]),new Elephant(Short.parseShort(weightsTab[i]),Integer.parseInt(positionsTab[i]),Integer.parseInt(predictedPositionsTab[i])));
         }
 
         return elephants;
     }
 
-    public List<Boolean> createBooleanListWithDefualtValue(int quantity){
-        List<Boolean> visited =  new ArrayList<>(Arrays.asList(new Boolean[quantity]));
-        Collections.fill(visited, false);
-        return visited;
-    }
-
-    public List<Integer> createIntegersListFromLine(String line) {
-        int[] tab = Stream.of(line.split(" ")).mapToInt(Integer::parseInt).toArray();
-        return Arrays.stream(tab).boxed().collect(Collectors.toList());
-    }
-
+    //-------------------------------------------------------------------
 
     public static void main(String[] args) {
         ElephantParade elephantParade = new ElephantParade("slo1.in", "result.out");
