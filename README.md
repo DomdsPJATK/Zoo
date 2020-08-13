@@ -1,4 +1,4 @@
-# Słonie
+# Słonie | Olimpiada informatyczna
 
 W Bajtockim Zoo ma się za chwilę odbyć parada, w której uczestniczyć będą wszystkie
 znajdujące się w nim słonie. Pracownicy zoo zachęcili już zwierzęta do ustawienia się w jednym
